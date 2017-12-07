@@ -194,6 +194,15 @@ module Chargify
         self.component_id
       end
 
+      def price_point
+        if(self.price_point_id)
+          PricePoint.find(self.price_point_id, :params => {:component_id => self.component_id})
+        else 
+          pps = price_points
+          pps.find { |pp| pp.default }
+        end
+      end
+
       def price_points(params = {})
         params.merge!(:component_id => self.component_id)
         PricePoint.find(:all, :params => params)
