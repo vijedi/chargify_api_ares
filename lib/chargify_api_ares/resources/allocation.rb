@@ -36,11 +36,28 @@ module Chargify
         connection.format = orig_format
       end
     end
+    def price_point
+      if(self.price_point_id)
+        PricePoint.find(self.price_point_id, :params => {:component_id => self.component_id})
+      else 
+        pps = price_points
+        pps.find { |pp| pp.default }
+      end
+    end
+
+    def price_points(params = {})
+      params.merge!(:component_id => self.component_id)
+      PricePoint.find(:all, :params => params)
+    end
 
     # Needed to avoid ActiveResource using Chargify::Payment
     # when there is a Payment inside an Allocation.
     # This Payment is an output-only attribute of an Allocation.
     class Payment < Base
     end
+    private 
+      class PricePoint < Base
+        self.prefix = '/components/:component_id/'
+      end
   end
 end
